@@ -234,7 +234,7 @@
 			var css = "";
 			for(id in byward){
 				var colour = "rgba(246, 136, 31, " + byward[id] / max + ")";
-				S('.'+id).find('.n').html(byward[id] + " incidents")
+				S('.'+id).find('.n').html(byward[id] + " incident"+(byward[id]==1 ? "":"s"))
 				css += '.hexmap li.'+id+' { background-color: '+colour+'; } .hexmap li.'+id+'::before, .hexmap li.'+id+'::after { border-color: '+colour+'; }';
 			}
 			//css += '.hexmap li:hover:before, .hexmap li:hover:after { border-color: black; } ';

@@ -1,0 +1,253 @@
+<html>
+<head>
+	<style>
+	html { height: 100%; }
+	body { font-family: sans-serif; margin: 0px; padding: 0px; background-color: white; text-align: center; height: 100%; width: 100%; justify-content: center; }
+	h1 { display: block; margin-bottom: 0px; margin-top: 0.5em; }
+	.mapholder {
+		background: #f9f9f9;
+		padding: 1em;	
+	}
+	.hexmap {
+		list-style: none;
+		margin: 0px;
+		padding: 0px;
+		border-color: red;
+		font-size: 2.5em;
+	}
+	.hexmap li {
+		margin-top: 0em;
+		margin-left: 0.7em;
+		margin-right: 0.7em;
+		margin-bottom: 0em;
+		width: 1.4em;
+		background-color: #efefef;
+		position: absolute;
+		float: left;
+		line-height: 2.2em;
+		height: 2.4em;
+		text-align: center;
+		font-family: monospace, sans-serif;
+		opacity: 1;
+		transition: all 1s linear;
+		box-sizing: border-box;
+	}
+	.hexmap li:before {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-left: 0px;
+		border-right: 0.7em solid #efefef;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		right: 1.4em;
+	}
+	.hexmap li:after {
+		content: "";
+		width: 0; 
+		position: absolute;
+		left: 1.4em;
+		border-color: transparent;
+		border-right: 0px;
+		border-left: 0.7em solid #efefef;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		top:0em;
+		z-index: 1;
+	}
+	.hexmap li,
+	.hexmap li:before,
+	.hexmap li:after {
+		transition: all 0.5s linear;
+	}
+	.hexmap li > .hex {
+		overflow: hidden;
+		line-height: 1em;
+		margin: 0.2em 0.1em;
+		width: 1.2em;
+		height: 2em;
+		text-align: center;
+		box-sizing: border-box;
+		position: absolute;
+		left: 0px;
+	}
+	.hexmap li:hover > .hex, .hexmap li.hover > .hex {
+		overflow: visible;
+		display: inline-block;
+		white-space: nowrap;
+		background: black;
+		width: auto;
+		margin: 0px;
+		padding: 0.2em 0.1em;
+		padding-right: 0.5em;
+		z-index: 100;
+		line-height: 2em;
+		height: 2.4em;
+	}
+	.hexmap li .hex .hexcontent {
+		text-align: center;
+	}
+	.hexmap li:hover .hex .hexcontent, .hexmap li.hover .hex .hexcontent {
+		line-height: 1em;
+		text-align: left;
+	}
+	.hexmap .hex .n {
+		display: block;
+		color: white;
+		font-size: 0.75em;
+	}
+	.hexmap .hex .name {
+		font-size: 0.5em;
+		text-align: left;
+		white-space: nowrap;
+	}
+	.hexmap li:hover .hex .name, .hexmap li.hover .hex .name {
+		text-align: left;
+	}
+
+	ul.key {
+		list-style: none;
+	}
+	ul.key li {
+		display: inline-block;
+		width: auto;
+		position: relative;
+		padding: 0.2em;
+		margin-right: 0.2em;
+	}
+
+	.hexmap li:hover, .hexmap li.hover { background-color: black; color: white; cursor: pointer; }
+	.hexmap li:hover:before, .hexmap li:hover:after, .hexmap li.hover:before, .hexmap li.hover:after { border-color: black; }
+
+	.hexmap {
+		position: relative;
+		height: 18.75em;
+		width: 16.25em;
+		margin: auto;
+	}
+	li { position: absolute; }
+	.r-1 { bottom: 0em; }
+	.r-2 { bottom: 2.5em; }
+	.r-3 { bottom: 5em; }
+	.r-4 { bottom: 7.5em; }
+	.r-5 { bottom: 10em; }
+	.r-6 { bottom: 12.5em; }
+	.r-7 { bottom: 15em; }
+	.r-8 { bottom: 17.5em; }
+	.r-9 { bottom: 20em; }
+	.r-10 { bottom: 22.5em; }
+	.r-11 { bottom: 25em; }
+	.r-12 { bottom: 27.5em; }
+	.r-13 { bottom: 30em; }
+	.c-1 { left: 0em; }
+	.c-2 { left: 2.25em; margin-bottom: 1.25em!important; }
+	.c-3 { left: 4.5em; }
+	.c-4 { left: 6.75em; margin-bottom: 1.25em!important; }
+	.c-5 { left: 9em; }
+	.c-6 { left: 11.25em; margin-bottom: 1.25em!important; }
+	.c-7 { left: 13.5em; }
+	.c-8 { left: 15.75em; margin-bottom: 1.25em!important; }
+
+	p {
+		max-width: 800px;
+		text-align: left;
+		margin: 1em auto;
+	}
+	code {
+		color: #02a24b;
+	}
+	</style>
+	<script>
+	// StuQuery
+	var eventcache={};function S(g){function a(n,m){var j=false;if(m[0]=="."){m=m.substr(1);for(var l=0;l<n.classList.length;l++){if(n.classList[l]==m){return true}}}else{if(m[0]=="#"){if(n.id==m.substr(1)){return true}}else{if(n.tagName==m.toUpperCase()){return true}}}return false}function c(p,o){var n=-1;var l=new Array();if(o.indexOf(":eq")>0){var j=o.replace(/(.*)\:eq\(([0-9]+)\)/,"$1 $2").split(" ");o=j[0];n=parseInt(j[1])}if(o[0]=="."){els=p.getElementsByClassName(o.substr(1))}else{if(o[0]=="#"){els=p.getElementById(o.substr(1))}else{els=p.getElementsByTagName(o)}}if(!els){els=[]}if(els.nodeName&&els.nodeName=="SELECT"){l.push(els)}else{if(typeof els.length!=="number"){els=[els]}for(k=0;k<els.length;k++){l.push(els[k])}if(n>=0&&l.length>0){if(n<l.length){l=[l[n]]}else{l=[]}}}return l}function d(p){if(typeof p==="string"){var e,p,q,o,m,l,n;e=p.split(" ");for(o=0;o<e.length;o++){if(o==0){p=c(document,e[o])}else{q=new Array();for(m=0;m<p.length;m++){q=q.concat(c(p[m],e[o]))}p=q.splice(0)}}}this.e=[];if(!p){return this}if(typeof p.length!=="number"){p=[p]}this.e=p;return this}d.prototype.ready=function(e){/in/.test(document.readyState)?setTimeout("S(document).ready("+e+")",9):e()};d.prototype.html=function(j){if(typeof j==="number"){j=""+j}if(typeof j!=="string"&&this.e.length==1){return this.e[0].innerHTML}if(typeof j==="string"){for(var e=0;e<this.e.length;e++){this.e[e].innerHTML=j}}return this};d.prototype.append=function(j){if(!j&&this.e.length==1){return this.e[0].innerHTML}if(j){for(var e=0;e<this.e.length;e++){this.e[e].innerHTML+=j}}return this};function h(e,l){if(e&&e.length>0){for(var j=0;j<e.length;j++){if(e[j].node==l){return{success:true,match:j}}}}return{success:false}}function f(n,l,j,i,m){if(!eventcache[l]){eventcache[l]=new Array()}eventcache[l].push({node:n,fn:j,fn2:i,data:m})}function b(j){if(eventcache[j.type]){var i=h(eventcache[j.type],j.currentTarget);if(i.success){if(i.match.data){j.data=eventcache[j.type][i.match].data}return{fn:eventcache[j.type][i.match].fn,data:j}}}return function(){return{fn:""}}}d.prototype.off=function(l){if(typeof Element.prototype.removeEventListener!=="function"){Element.prototype.removeEventListener=function(r,o){if(!oListeners.hasOwnProperty(r)){return}var n=oListeners[r];for(var i=-1,m=0;m<n.aEls.length;m++){if(n.aEls[m]===this){i=m;break}}if(i===-1){return}for(var q=0,p=n.aEvts[i];q<p.length;q++){if(p[q]===o){p.splice(q,1)}}}}for(var j=0;j<this.e.length;j++){var e=h(eventcache[l],this.e[j]);if(e.success){this.e[j].removeEventListener(l,eventcache[l][e.match].fn2,false);eventcache[l].splice(e.match,1)}}return this};d.prototype.on=function(m,n,l){m=m||window.event;this.cache=[4,5,6];if(typeof n==="function"&&!l){l=n;n=""}if(typeof l!=="function"){return this}if(this.e.length>0){var o=this;var e=function(i){var p=b({currentTarget:this,type:m,data:n,originalEvent:i});if(typeof p.fn==="function"){return p.fn.call(o,p.data)}};for(var j=0;j<this.e.length;j++){f(this.e[j],m,l,e,n);if(this.e[j].addEventListener){this.e[j].addEventListener(m,e,false)}else{if(this.e[j].attachEvent){this.e[j].attachEvent(m,e)}}}}return this};d.prototype.trigger=function(m){var l;if(document.createEvent){l=document.createEvent("HTMLEvents");l.initEvent(m,true,true)}else{l=document.createEventObject();l.eventType=m}l.eventName=m;for(var j=0;j<this.e.length;j++){if(document.createEvent){this.e[j].dispatchEvent(l)}else{this.e[j].fireEvent("on"+l.eventType,l)}}return this};d.prototype.focus=function(){if(this.e.length==1){this.e[0].focus()}return this};d.prototype.blur=function(){if(this.e.length==1){this.e[0].blur()}return this};d.prototype.remove=function(){if(!this.e){return this}for(var e=this.e.length-1;e>=0;e--){if(!this.e[e]){return}if(typeof this.e[e].remove==="function"){this.e[e].remove()}else{if(typeof this.e[e].parentElement.removeChild==="function"){this.e[e].parentElement.removeChild(this.e[e])}}}return S(this.e)};d.prototype.hasClass=function(j){var e=true;for(var l=0;l<this.e.length;l++){if(!this.e[l].className.match(new RegExp("(\\s|^)"+j+"(\\s|$)"))){e=false}}return e};d.prototype.toggleClass=function(e){for(var j=0;j<this.e.length;j++){if(this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=this.e[j].className.replace(new RegExp("(\\s|^)"+e+"(\\s|$)","g")," ").replace(/ $/,"")}else{this.e[j].className=(this.e[j].className+" "+e).replace(/^ /,"")}}return S(this.e)};d.prototype.addClass=function(e){for(var j=0;j<this.e.length;j++){if(!this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=(this.e[j].className+" "+e).replace(/^ /,"")}}return S(this.e)};d.prototype.removeClass=function(e){for(var j=0;j<this.e.length;j++){while(this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=this.e[j].className.replace(new RegExp("(\\s|^)"+e+"(\\s|$)","g")," ").replace(/ $/,"").replace(/^ /,"")}}return S(this.e)};d.prototype.css=function(m){var o;for(var l=0;l<this.e.length;l++){o={};var n=this.e[l].getAttribute("style");if(n){var q=this.e[l].getAttribute("style").split(";");for(var j=0;j<q.length;j++){var p=q[j].split(":");if(p.length==2){o[p[0]]=p[1]}}}if(typeof m==="object"){for(key in m){o[key]=m[key]}var e="";for(key in o){if(e){e+=";"}if(o[key]){e+=key+":"+o[key]}}this.e[l].setAttribute("style",e)}}if(this.e.length==1&&typeof m==="string"){return o[m]}return S(this.e)};d.prototype.parent=function(){var j=[];for(var e=0;e<this.e.length;e++){j.push(this.e[e].parentElement)}return S(j)};d.prototype.children=function(m){if(typeof m==="string"){var e=[];for(var j=0;j<this.e.length;j++){for(var l=0;l<this.e[j].children.length;l++){if(a(this.e[j].children[l],m)){e.push(this.e[j].children[l])}}}return S(e)}else{for(var j=0;j<this.e.length;j++){this.e[j]=(this.e[j].children.length>m?this.e[j].children[m]:this.e[j])}return S(this.e)}};d.prototype.find=function(j){var m=[];var e=[];for(var l=0;l<this.e.length;l++){m=c(this.e[l],j);for(k=0;k<m.length;k++){e.push(m[k])}}return S(e)};d.prototype.attr=function(e,m){var l=[];for(var j=0;j<this.e.length;j++){l.push(this.e[j].getAttribute(e));if(typeof m==="string"||typeof m==="number"){this.e[j].setAttribute(e,m)}}if(l.length==1){l=l[0]}if(typeof m==="undefined"){return l}else{return S(this.e)}};d.prototype.prop=function(e,m){var l=[];for(var j=0;j<this.e.length;j++){l.push(this.e[j].getAttribute(e));if(typeof m==="boolean"){if(m){this.e[j].setAttribute(e,e)}else{this.e[j].removeAttribute(e)}}}if(l.length==1){l=l[0]}return l};d.prototype.clone=function(){var e=document.createElement("div");e.appendChild(this.e[0].cloneNode(true));return e.innerHTML};d.prototype.replaceWith=function(j){var l=document.createElement("span");l.innerHTML=j;var m=S(this.e);for(var e=0;e<this.e.length;e++){m.e[0].parentNode.replaceChild(l,m.e[0])}return m};d.prototype.ajax=function(l,j){if(typeof l!=="string"){return false}if(!j){j={}}j.url=l;var n=(window.XMLHttpRequest)?new XMLHttpRequest():new ActiveXObject("Microsoft.XMLHTTP");n.addEventListener("load",e);n.addEventListener("error",i);function e(o){if(n.status===200){if(typeof j.complete==="function"){j.complete.call((j["this"]?j["this"]:this),(j.dataType=="json")?JSON.parse(n.responseText):n.responseText,j)}}else{i(o)}}function i(o){if(typeof j.error==="function"){j.error.call((j["this"]?j["this"]:this),o,j)}}try{n.open("GET",l)}catch(m){i(m)}try{n.send()}catch(m){i(m)}return this};d.prototype.loadJSON=function(i,j,e){if(!e){e={}}e.dataType="json";e.complete=j;this.ajax(i,e);return this};return new d(g)};
+
+
+	S(document).ready(function(){
+	
+		var wardArray = ["ADEL_AND_WHARFEDALE", "ALWOODLEY", "ARDSLEY_AND_ROBIN_HOOD", "ARMLEY", "BEESTON_AND_HOLBECK", "BRAMLEY_AND_STANNINGLEY", "BURMANTOFTS_AND_RICHMOND_HILL", "CALVERLEY_AND_FARSLEY", "CHAPEL_ALLERTON", "CITY_AND_HUNSLET", "CROSS_GATES_AND_WHINMOOR", "FARNLEY_AND_WORTLEY", "GARFORTH_AND_SWILLINGTON", "GIPTON_AND_HAREHILLS", "GUISELEY_AND_RAWDON", "HAREWOOD", "HEADINGLEY", "HORSFORTH", "HYDE_PARK_AND_WOODHOUSE", "KILLINGBECK_AND_SEACROFT", "KIPPAX_AND_METHLEY", "KIRKSTALL", "MIDDLETON_PARK", "MOORTOWN", "MORLEY_NORTH", "MORLEY_SOUTH", "OTLEY_AND_YEADON", "PUDSEY", "ROTHWELL", "ROUNDHAY", "TEMPLE_NEWSAM", "WEETWOOD", "WETHERBY", "LEEDS"];
+		var oneBedA = [29, 35, 34, 31, 34, 32, 34, 25, 39, 44, 48, 28, 20, 42, 41, 35, 90, 32, 42, 32, 24, 57, 34, 39, 49, 48, 44, 31, 27, 36, 30, 41, 24, 36];
+		var twoBedA = [22, 43, 51, 25, 24, 36, 23, 42, 44, 30, 49, 32, 44, 39, 57, 76, 19, 40, 39, 38, 39, 43, 29, 32, 44, 36, 51, 36, 36, 38, 28, 45, 33, 35];
+		var threeBedA = [51, 66, 24, 21, 24, 24, 30, 36, 40, 28, 34, 23, 37, 27, 62, 24, 60, 51, 36, 28, 37, 40, 19, 46, 29, 29, 58, 28, 28, 38, 31, 48, 73, 32];
+
+
+		// Create ourselves an empty stylesheet that we can update later
+		S('body').append('<style id="customstylesheet"></style>');
+
+		// Listen for changes to the dropdown select box
+		S('#size').on('change',function(){ update(); });
+
+		function update() {
+			var i = size.selectedIndex;
+			var data = oneBedA;
+			if(i==1) data = twoBedA;
+			if(i==2) data = threeBedA;
+
+			var css = "";
+			for (var n = 0; n < wardArray.length; n++) {
+				var ward = S('.'+wardArray[n]);
+				var el = ward.find('.name');
+				//el.html(el.attr('title')+': '+data[n] + " weeks");
+				ward.find('.n').html(data[n] + " weeks")
+				var colour = "rgba(100, 20, 20, " + data[n] / 100 + ")";
+				css += '.hexmap li.'+wardArray[n]+' { background-color: '+colour+'; } .hexmap li.'+wardArray[n]+'::before, .hexmap li.'+wardArray[n]+'::after { border-color: '+colour+'; }';
+			}
+			css += '.hexmap li:hover:before, .hexmap li:hover:after { border-color: black; } .hexmap li:hover:before { transition: all 0s linear; }'
+			S('#customstylesheet').html(css);
+		}
+		update();
+	});
+
+	</script>
+</head>
+<body>
+
+    <h1>BestChoice</h1>
+    <p style="text-align:center;">Increase your chances of securing a home by applying in a clever place.</p>
+    <label for="size">How many rooms?</label>
+    <select id="size">
+        <option id="one">1 bed</option>
+        <option id="two">2 bed</option>
+        <option id="three">3 bed</option>
+    </select>
+
+	<div class="mapholder">
+		<ol class="hexmap">
+			<li class="ARDSLEY_AND_ROBIN_HOOD r-1 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Ardsley &amp; Robin Hood">Ardsley &amp; Robin Hood</span><span class="n"></span></div></div></li>
+			<li class="MORLEY_NORTH r-2 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Morley North">Morley North</span><span class="n"></span></div></div></li>
+			<li class="MORLEY_SOUTH r-2 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Morley South">Morley South</span><span class="n"></span></div></div></li>
+			<li class="MIDDLETON_PARK r-2 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Middleton Park">Middleton Park</span><span class="n"></span></div></div></li>
+			<li class="ROTHWELL r-2 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Rothwell">Rothwell</span><span class="n"></span></div></div></li>
+			<li class="GARFORTH_AND_SWILLINGTON r-2 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Garforth &amp; Swillington">Garforth &amp; Swillington</span><span class="n"></span></div></div></li>
+			<li class="FARNLEY_AND_WORTLEY r-3 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Farnley &amp; Wortley">Farnley &amp; Wortley</span><span class="n"></span></div></div></li>
+			<li class="BEESTON_AND_HOLBECK r-3 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Beeston &amp; Holbeck">Beeston &amp; Holbeck</span><span class="n"></span></div></div></li>
+			<li class="CITY_AND_HUNSLET r-3 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="City &amp; Hunslet">City &amp; Hunslet</span><span class="n"></span></div></div></li>
+			<li class="BURMANTOFTS_AND_RICHMOND_HILL r-3 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Burmantofts &amp; Richmond Hill">Burmantofts &amp; Richmond Hill</span><span class="n"></span></div></div></li>
+			<li class="TEMPLE_NEWSAM r-3 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Temple Newsam">Temple Newsam</span><span class="n"></span></div></div></li>
+			<li class="KIPPAX_AND_METHLEY r-3 c-7"><div class="hex"><div class="hexcontent"><span class="name" title="Kippax &amp; Methley">Kippax &amp; Methley</span><span class="n"></span></div></div></li>
+			<li class="BRAMLEY_AND_STANNINGLEY r-4 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Bramley &amp; Stanningley">Bramley &amp; Stanningley</span><span class="n"></span></div></div></li>
+			<li class="ARMLEY r-4 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Armley">Armley</span><span class="n"></span></div></div></li>
+			<li class="HYDE_PARK_AND_WOODHOUSE r-4 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Hyde Park &amp; Woodhouse">Hyde Park &amp; Woodhouse</span><span class="n"></span></div></div></li>
+			<li class="GIPTON_AND_HAREHILLS r-4 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Gipton &amp; Harehills">Gipton & Harehills</span><span class="n"></span></div></div></li>
+			<li class="KILLINGBECK_AND_SEACROFT r-4 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Killingbeck &amp; Seacroft">Killingbeck &amp; Seacroft</span><span class="n"></span></div></div></li>
+			<li class="PUDSEY r-5 c-1"><div class="hex"><div class="hexcontent"><span class="name" title="Pudsey">Pudsey</span><span class="n"></span></div></div></li>
+			<li class="CALVERLEY_AND_FARSLEY r-5 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Calverley &amp; Farsley">Calverley &amp; Farsley</span><span class="n"></span></div></div></li>
+			<li class="KIRKSTALL r-5 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Kirkstall">Kirkstall</span><span class="n"></span></div></div></li>
+			<li class="HEADINGLEY r-5 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Headingley">Headingley</span><span class="n"></span></div></div></li>
+			<li class="CHAPEL_ALLERTON r-5 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Chapel Allerton">Chapel Allerton</span><span class="n"></span></div></div></li>
+			<li class="ROUNDHAY r-5 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Roundhay">Roundhay</span><span class="n"></span></div></div></li>
+			<li class="CROSS_GATES_AND_WHINMOOR r-5 c-7"><div class="hex"><div class="hexcontent"><span class="name" title="Cross Gates &amp; Whinmoor">Cross Gates &amp; Whinmoor</span><span class="n"></span></div></div></li>
+			<li class="GUISELEY_AND_RAWDON r-6 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Guiseley &amp; Rawdon">Guiseley &amp; Rawdon</span><span class="n"></span></div></div></li>
+			<li class="HORSFORTH r-6 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Horsforth">Horsforth</span><span class="n"></span></div></div></li>
+			<li class="WEETWOOD r-6 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Weetwood">Weetwood</span><span class="n"></span></div></div></li>
+			<li class="MOORTOWN r-6 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Moortown">Moortown</span><span class="n"></span></div></div></li>
+			<li class="HAREWOOD r-6 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Harewood">Harewood</span><span class="n"></span></div></div></li>
+			<li class="WETHERBY r-6 c-7"><div class="hex"><div class="hexcontent"><span class="name" title="Wetherby">Wetherby</span><span class="n"></span></div></div></li>
+			<li class="OTLEY_AND_YEADON r-7 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Otley &amp; Yeadon">Otley &amp; Yeadon</span><span class="n"></span></div></div></li>
+			<li class="ADEL_AND_WHARFEDALE r-7 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Adel &amp; Wharfedale">Adel &amp; Wharfedale</span><span class="n"></span></div></div></li>
+			<li class="ALWOODLEY r-7 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Alwoodley">Alwoodley</span><span class="n"></span></div></div></li>
+			<li class="LEEDS r-1 c-1"><div class="hex"><div class="hexcontent"><span class="name" title="Leeds">Leeds</span><span class="n"></span></div></div></li>
+		</ol>
+	</div>
+</body>
+</html>

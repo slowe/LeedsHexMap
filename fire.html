@@ -86,7 +86,22 @@
 		z-index: 100;
 		line-height: 2em;
 		height: 2.4em;
+		color: white;
 	}
+
+	.hexmap li:hover > .hex:before, .hexmap li.hover > .hex:before {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-left: 0px;
+		border-right: 0.7em solid black;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		left: -0.7em;
+		top:0px;
+	}
+
 	.hexmap li .hex .hexcontent {
 		text-align: center;
 	}
@@ -117,10 +132,6 @@
 		padding: 0.2em;
 		margin-right: 0.2em;
 	}
-
-	.hexmap li:hover, .hexmap li.hover { background-color: black; color: white; cursor: pointer; }
-	.hexmap li:hover:before, .hexmap li:hover:after, .hexmap li.hover:before, .hexmap li.hover:after { border-color: black; }
-
 	.hexmap {
 		position: relative;
 		height: 18.75em;
@@ -226,7 +237,8 @@
 				S('.'+id).find('.n').html(byward[id] + " incidents")
 				css += '.hexmap li.'+id+' { background-color: '+colour+'; } .hexmap li.'+id+'::before, .hexmap li.'+id+'::after { border-color: '+colour+'; }';
 			}
-			css += '.hexmap li:hover:before, .hexmap li:hover:after { border-color: black; } .hexmap li:hover:before { transition: all 0s linear; }'
+			//css += '.hexmap li:hover:before, .hexmap li:hover:after { border-color: black; } ';
+			css += '.hexmap li:hover:before { transition: all 0s linear; }'
 			S('#customstylesheet').html(css);
 		}
 	});

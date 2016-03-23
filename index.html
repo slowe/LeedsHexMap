@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>Social housing wait times | Leeds ward map</title>
+	<title>Fire incidents | Leeds ward map</title>
 	<style>
 	html { height: 100%; }
 	body { font-family: sans-serif; margin: 0px; padding: 0px; background-color: white; text-align: center; height: 100%; width: 100%; justify-content: center; }
@@ -15,9 +15,9 @@
 		margin: 0px;
 		padding: 0px;
 		border-color: red;
-		font-size: 2.5em;
+		font-size: 2em;
 	}
-	.hexmap li {
+	.hexmap .hextile {
 		margin-top: 0em;
 		margin-left: 0.7em;
 		margin-right: 0.7em;
@@ -34,7 +34,7 @@
 		transition: all 1s linear;
 		box-sizing: border-box;
 	}
-	.hexmap li:before {
+	.hexmap .hextile:before {
 		content: " ";
 		width: 0; height: 0;
 		border-color: inherit;
@@ -45,7 +45,7 @@
 		position: absolute;
 		right: 1.4em;
 	}
-	.hexmap li:after {
+	.hexmap .hextile:after {
 		content: "";
 		width: 0; 
 		position: absolute;
@@ -58,12 +58,12 @@
 		top:0em;
 		z-index: 1;
 	}
-	.hexmap li,
-	.hexmap li:before,
-	.hexmap li:after {
+	.hexmap .hextile,
+	.hexmap .hextile:before,
+	.hexmap .hextile:after {
 		transition: all 0.5s linear;
 	}
-	.hexmap li > .hex {
+	.hexmap .hextile > .hex {
 		overflow: hidden;
 		line-height: 1em;
 		margin: 0.2em 0.1em;
@@ -74,7 +74,7 @@
 		position: absolute;
 		left: 0px;
 	}
-	.hexmap li:hover > .hex, .hexmap li.hover > .hex {
+	.hexmap .hextile:hover > .hex, .hexmap .hextile.hover > .hex {
 		overflow: visible;
 		display: inline-block;
 		white-space: nowrap;
@@ -86,27 +86,66 @@
 		z-index: 100;
 		line-height: 2em;
 		height: 2.4em;
+		color: white;
 	}
-	.hexmap li .hex .hexcontent {
+
+	.hexmap .hextile:hover > .hex:before, .hexmap .hextile.hover > .hex:before {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-left: 0px;
+		border-right: 0.7em solid black;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		left: -0.7em;
+		top:0px;
+	}
+	.hexmap .hextile .hex .hexcontent {
 		text-align: center;
 	}
-	.hexmap li:hover .hex .hexcontent, .hexmap li.hover .hex .hexcontent {
+	.hexmap .hextile:hover .hex .hexcontent, .hexmap .hextile.hover .hex .hexcontent {
 		line-height: 1em;
 		text-align: left;
 	}
 	.hexmap .hex .n {
 		display: block;
-		color: white;
-		font-size: 0.75em;
+		font-size: 0.7em;
 	}
 	.hexmap .hex .name {
-		font-size: 0.5em;
+		font-size: 0.4em;
 		text-align: left;
 		white-space: nowrap;
 	}
-	.hexmap li:hover .hex .name, .hexmap li.hover .hex .name {
+	.hexmap .hextile:hover .hex .name, .hexmap .hextile.hover .hex .name {
 		text-align: left;
 	}
+	/* Deal with right-aligned hex content */
+	.hexmap .hextile:hover > .hex.hexright, .hexmap .hextile.hover > .hex.hexright {
+		position: absolute;
+		left: auto;
+		right: 0px;
+	}
+	.hexmap .hextile:hover > .hex.hexright:before, .hexmap .hextile.hover > .hex.hexright:before {
+		border: 0px;
+	}
+	.hexmap .hextile:hover > .hex.hexright:after, .hexmap .hextile.hover > .hex.hexright:after {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-right: 0px;
+		border-left: 0.7em solid black;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		right: -0.692em;
+		top:0px;
+	}
+	.hexmap .hextile:hover > .hex.hexright, .hexmap .hextile.hover > .hex.hexright {
+		padding: 0.2em 0.1em;
+		padding-left: 0.5em;
+	}
+
 
 	ul.key {
 		list-style: none;
@@ -118,10 +157,6 @@
 		padding: 0.2em;
 		margin-right: 0.2em;
 	}
-
-	.hexmap li:hover, .hexmap li.hover { background-color: black; color: white; cursor: pointer; }
-	.hexmap li:hover:before, .hexmap li:hover:after, .hexmap li.hover:before, .hexmap li.hover:after { border-color: black; }
-
 	.hexmap {
 		position: relative;
 		height: 18.75em;
@@ -164,96 +199,117 @@
 	}
 	</style>
 	<script>
-	// StuQuery
+	// StuQuery - a minimal script to provide jQuery-like functionality
 	var eventcache={};function S(g){function a(n,m){var j=false;if(m[0]=="."){m=m.substr(1);for(var l=0;l<n.classList.length;l++){if(n.classList[l]==m){return true}}}else{if(m[0]=="#"){if(n.id==m.substr(1)){return true}}else{if(n.tagName==m.toUpperCase()){return true}}}return false}function c(p,o){var n=-1;var l=new Array();if(o.indexOf(":eq")>0){var j=o.replace(/(.*)\:eq\(([0-9]+)\)/,"$1 $2").split(" ");o=j[0];n=parseInt(j[1])}if(o[0]=="."){els=p.getElementsByClassName(o.substr(1))}else{if(o[0]=="#"){els=p.getElementById(o.substr(1))}else{els=p.getElementsByTagName(o)}}if(!els){els=[]}if(els.nodeName&&els.nodeName=="SELECT"){l.push(els)}else{if(typeof els.length!=="number"){els=[els]}for(k=0;k<els.length;k++){l.push(els[k])}if(n>=0&&l.length>0){if(n<l.length){l=[l[n]]}else{l=[]}}}return l}function d(p){if(typeof p==="string"){var e,p,q,o,m,l,n;e=p.split(" ");for(o=0;o<e.length;o++){if(o==0){p=c(document,e[o])}else{q=new Array();for(m=0;m<p.length;m++){q=q.concat(c(p[m],e[o]))}p=q.splice(0)}}}this.e=[];if(!p){return this}if(typeof p.length!=="number"){p=[p]}this.e=p;return this}d.prototype.ready=function(e){/in/.test(document.readyState)?setTimeout("S(document).ready("+e+")",9):e()};d.prototype.html=function(j){if(typeof j==="number"){j=""+j}if(typeof j!=="string"&&this.e.length==1){return this.e[0].innerHTML}if(typeof j==="string"){for(var e=0;e<this.e.length;e++){this.e[e].innerHTML=j}}return this};d.prototype.append=function(j){if(!j&&this.e.length==1){return this.e[0].innerHTML}if(j){for(var e=0;e<this.e.length;e++){this.e[e].innerHTML+=j}}return this};function h(e,l){if(e&&e.length>0){for(var j=0;j<e.length;j++){if(e[j].node==l){return{success:true,match:j}}}}return{success:false}}function f(n,l,j,i,m){if(!eventcache[l]){eventcache[l]=new Array()}eventcache[l].push({node:n,fn:j,fn2:i,data:m})}function b(j){if(eventcache[j.type]){var i=h(eventcache[j.type],j.currentTarget);if(i.success){if(i.match.data){j.data=eventcache[j.type][i.match].data}return{fn:eventcache[j.type][i.match].fn,data:j}}}return function(){return{fn:""}}}d.prototype.off=function(l){if(typeof Element.prototype.removeEventListener!=="function"){Element.prototype.removeEventListener=function(r,o){if(!oListeners.hasOwnProperty(r)){return}var n=oListeners[r];for(var i=-1,m=0;m<n.aEls.length;m++){if(n.aEls[m]===this){i=m;break}}if(i===-1){return}for(var q=0,p=n.aEvts[i];q<p.length;q++){if(p[q]===o){p.splice(q,1)}}}}for(var j=0;j<this.e.length;j++){var e=h(eventcache[l],this.e[j]);if(e.success){this.e[j].removeEventListener(l,eventcache[l][e.match].fn2,false);eventcache[l].splice(e.match,1)}}return this};d.prototype.on=function(m,n,l){m=m||window.event;this.cache=[4,5,6];if(typeof n==="function"&&!l){l=n;n=""}if(typeof l!=="function"){return this}if(this.e.length>0){var o=this;var e=function(i){var p=b({currentTarget:this,type:m,data:n,originalEvent:i});if(typeof p.fn==="function"){return p.fn.call(o,p.data)}};for(var j=0;j<this.e.length;j++){f(this.e[j],m,l,e,n);if(this.e[j].addEventListener){this.e[j].addEventListener(m,e,false)}else{if(this.e[j].attachEvent){this.e[j].attachEvent(m,e)}}}}return this};d.prototype.trigger=function(m){var l;if(document.createEvent){l=document.createEvent("HTMLEvents");l.initEvent(m,true,true)}else{l=document.createEventObject();l.eventType=m}l.eventName=m;for(var j=0;j<this.e.length;j++){if(document.createEvent){this.e[j].dispatchEvent(l)}else{this.e[j].fireEvent("on"+l.eventType,l)}}return this};d.prototype.focus=function(){if(this.e.length==1){this.e[0].focus()}return this};d.prototype.blur=function(){if(this.e.length==1){this.e[0].blur()}return this};d.prototype.remove=function(){if(!this.e){return this}for(var e=this.e.length-1;e>=0;e--){if(!this.e[e]){return}if(typeof this.e[e].remove==="function"){this.e[e].remove()}else{if(typeof this.e[e].parentElement.removeChild==="function"){this.e[e].parentElement.removeChild(this.e[e])}}}return S(this.e)};d.prototype.hasClass=function(j){var e=true;for(var l=0;l<this.e.length;l++){if(!this.e[l].className.match(new RegExp("(\\s|^)"+j+"(\\s|$)"))){e=false}}return e};d.prototype.toggleClass=function(e){for(var j=0;j<this.e.length;j++){if(this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=this.e[j].className.replace(new RegExp("(\\s|^)"+e+"(\\s|$)","g")," ").replace(/ $/,"")}else{this.e[j].className=(this.e[j].className+" "+e).replace(/^ /,"")}}return S(this.e)};d.prototype.addClass=function(e){for(var j=0;j<this.e.length;j++){if(!this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=(this.e[j].className+" "+e).replace(/^ /,"")}}return S(this.e)};d.prototype.removeClass=function(e){for(var j=0;j<this.e.length;j++){while(this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=this.e[j].className.replace(new RegExp("(\\s|^)"+e+"(\\s|$)","g")," ").replace(/ $/,"").replace(/^ /,"")}}return S(this.e)};d.prototype.css=function(m){var o;for(var l=0;l<this.e.length;l++){o={};var n=this.e[l].getAttribute("style");if(n){var q=this.e[l].getAttribute("style").split(";");for(var j=0;j<q.length;j++){var p=q[j].split(":");if(p.length==2){o[p[0]]=p[1]}}}if(typeof m==="object"){for(key in m){o[key]=m[key]}var e="";for(key in o){if(e){e+=";"}if(o[key]){e+=key+":"+o[key]}}this.e[l].setAttribute("style",e)}}if(this.e.length==1&&typeof m==="string"){return o[m]}return S(this.e)};d.prototype.parent=function(){var j=[];for(var e=0;e<this.e.length;e++){j.push(this.e[e].parentElement)}return S(j)};d.prototype.children=function(m){if(typeof m==="string"){var e=[];for(var j=0;j<this.e.length;j++){for(var l=0;l<this.e[j].children.length;l++){if(a(this.e[j].children[l],m)){e.push(this.e[j].children[l])}}}return S(e)}else{for(var j=0;j<this.e.length;j++){this.e[j]=(this.e[j].children.length>m?this.e[j].children[m]:this.e[j])}return S(this.e)}};d.prototype.find=function(j){var m=[];var e=[];for(var l=0;l<this.e.length;l++){m=c(this.e[l],j);for(k=0;k<m.length;k++){e.push(m[k])}}return S(e)};d.prototype.attr=function(e,m){var l=[];for(var j=0;j<this.e.length;j++){l.push(this.e[j].getAttribute(e));if(typeof m==="string"||typeof m==="number"){this.e[j].setAttribute(e,m)}}if(l.length==1){l=l[0]}if(typeof m==="undefined"){return l}else{return S(this.e)}};d.prototype.prop=function(e,m){var l=[];for(var j=0;j<this.e.length;j++){l.push(this.e[j].getAttribute(e));if(typeof m==="boolean"){if(m){this.e[j].setAttribute(e,e)}else{this.e[j].removeAttribute(e)}}}if(l.length==1){l=l[0]}return l};d.prototype.clone=function(){var e=document.createElement("div");e.appendChild(this.e[0].cloneNode(true));return e.innerHTML};d.prototype.replaceWith=function(j){var l=document.createElement("span");l.innerHTML=j;var m=S(this.e);for(var e=0;e<this.e.length;e++){m.e[0].parentNode.replaceChild(l,m.e[0])}return m};d.prototype.ajax=function(l,j){if(typeof l!=="string"){return false}if(!j){j={}}j.url=l;var n=(window.XMLHttpRequest)?new XMLHttpRequest():new ActiveXObject("Microsoft.XMLHTTP");n.addEventListener("load",e);n.addEventListener("error",i);function e(o){if(n.status===200){if(typeof j.complete==="function"){j.complete.call((j["this"]?j["this"]:this),(j.dataType=="json")?JSON.parse(n.responseText):n.responseText,j)}}else{i(o)}}function i(o){if(typeof j.error==="function"){j.error.call((j["this"]?j["this"]:this),o,j)}}try{n.open("GET",l)}catch(m){i(m)}try{n.send()}catch(m){i(m)}return this};d.prototype.loadJSON=function(i,j,e){if(!e){e={}}e.dataType="json";e.complete=j;this.ajax(i,e);return this};return new d(g)};
 
-
+	var db = new Array();
 	S(document).ready(function(){
 	
-		var wardArray = ["ADEL_AND_WHARFEDALE", "ALWOODLEY", "ARDSLEY_AND_ROBIN_HOOD", "ARMLEY", "BEESTON_AND_HOLBECK", "BRAMLEY_AND_STANNINGLEY", "BURMANTOFTS_AND_RICHMOND_HILL", "CALVERLEY_AND_FARSLEY", "CHAPEL_ALLERTON", "CITY_AND_HUNSLET", "CROSS_GATES_AND_WHINMOOR", "FARNLEY_AND_WORTLEY", "GARFORTH_AND_SWILLINGTON", "GIPTON_AND_HAREHILLS", "GUISELEY_AND_RAWDON", "HAREWOOD", "HEADINGLEY", "HORSFORTH", "HYDE_PARK_AND_WOODHOUSE", "KILLINGBECK_AND_SEACROFT", "KIPPAX_AND_METHLEY", "KIRKSTALL", "MIDDLETON_PARK", "MOORTOWN", "MORLEY_NORTH", "MORLEY_SOUTH", "OTLEY_AND_YEADON", "PUDSEY", "ROTHWELL", "ROUNDHAY", "TEMPLE_NEWSAM", "WEETWOOD", "WETHERBY", "LEEDS"];
-		var oneBedA = [29, 35, 34, 31, 34, 32, 34, 25, 39, 44, 48, 28, 20, 42, 41, 35, 90, 32, 42, 32, 24, 57, 34, 39, 49, 48, 44, 31, 27, 36, 30, 41, 24, 36];
-		var twoBedA = [22, 43, 51, 25, 24, 36, 23, 42, 44, 30, 49, 32, 44, 39, 57, 76, 19, 40, 39, 38, 39, 43, 29, 32, 44, 36, 51, 36, 36, 38, 28, 45, 33, 35];
-		var threeBedA = [51, 66, 24, 21, 24, 24, 30, 36, 40, 28, 34, 23, 37, 27, 62, 24, 60, 51, 36, 28, 37, 40, 19, 46, 29, 29, 58, 28, 28, 38, 31, 48, 73, 32];
+		var wards = {"Adel and Wharfedale": "E05001411","Alwoodley": "E05001412","Ardsley and Robin Hood": "E05001413","Armley": "E05001414","Beeston and Holbeck": "E05001415","Bramley and Stanningley": "E05001416","Burmantofts and Richmond Hill": "E05001417","Calverley and Farsley": "E05001418","Chapel Allerton": "E05001419","City and Hunslet": "E05001420","Cross Gates and Whinmoor": "E05001421","Farnley and Wortley": "E05001422","Garforth and Swillington": "E05001423","Gipton and Harehills": "E05001424","Guiseley and Rawdon": "E05001425","Harewood": "E05001426","Headingley": "E05001427","Horsforth": "E05001428","Hyde Park and Woodhouse": "E05001429","Killingbeck and Seacroft": "E05001430","Kippax and Methley": "E05001431","Kirkstall": "E05001432","Middleton Park": "E05001433","Moortown": "E05001434","Morley North": "E05001435","Morley South": "E05001436","Otley and Yeadon": "E05001437","Pudsey": "E05001438","Rothwell": "E05001439","Roundhay": "E05001440","Temple Newsam": "E05001441","Weetwood": "E05001442","Wetherby": "E05001443" }
 
+		S(document).ajax("data/fire_incident_report.csv",{
+			'complete': function(data){
+				var line,i;
+				var categories = new Array();
+				if(typeof data==="string") data = data.replace(/\r/g,'').split(/[\n]/);
+				for(i = 1; i < data.length; i++){
+					line = data[i].split(",");
+					// Inc No,Incident Type,Date,Time,District,Cause,Ward
+					// 1547005758,Accidential Primary Fires,01/04/2015,10:18:24,Leeds,Other cause,City and Hunslet Ward
+					if(line[0]) db.push({'id':line[0],'itype':line[1],'date':line[2],'time':line[3],'district':line[4],'cause':line[5],'ward':line[6]});
+					if(!categories[line[1]]) categories[line[1]] = 0;
+					categories[line[1]]++;
+				}
+				
+				html = "";
+				for(c in categories) html += '<option value="'+c+'">'+c+'</option>'
+				S('#category').html(html);
+				
+				update();
+			},
+			'error': function(e){ console.log(e); }
+		})
 
 		// Create ourselves an empty stylesheet that we can update later
 		S('body').append('<style id="customstylesheet"></style>');
 
 		// Listen for changes to the dropdown select box
-		S('#size').on('change',function(){ update(); });
+		S('#category').on('change',function(){ update(); });
 
 		function update() {
-			var i = size.selectedIndex;
-			var data = oneBedA;
-			if(i==1) data = twoBedA;
-			if(i==2) data = threeBedA;
 
-			var css = "";
-			for (var n = 0; n < wardArray.length; n++) {
-				var ward = S('.'+wardArray[n]);
-				var el = ward.find('.name');
-				//el.html(el.attr('title')+': '+data[n] + " weeks");
-				ward.find('.n').html(data[n] + " weeks")
-				var colour = "rgba(100, 20, 20, " + data[n] / 100 + ")";
-				css += '.hexmap li.'+wardArray[n]+' { background-color: '+colour+'; } .hexmap li.'+wardArray[n]+'::before, .hexmap li.'+wardArray[n]+'::after { border-color: '+colour+'; }';
+			var typ = S('#category').e[0].value;
+
+			var byward = { 'Leeds': 0 };
+			for(i = 0; i < db.length; i++){
+				w = db[i].ward.replace(/ Ward/,"");
+				w = (wards[w]) ? wards[w] : "";
+				if(w && !byward[w]) byward[w] = 0;
+				if(db[i].itype == typ){
+					if(w) byward[w]++;
+					byward['Leeds']++;
+				}
 			}
-			css += '.hexmap li:hover:before, .hexmap li:hover:after { border-color: black; } .hexmap li:hover:before { transition: all 0s linear; }'
+			var max = 0;
+			for(id in byward){
+				if(byward[id] > max && id != "Leeds") max = byward[id];
+			}
+			var css = "";
+			for(id in byward){
+				var colour = "rgba(246, 136, 31, " + byward[id] / max + ")";
+				S('.'+id).find('.n').html(byward[id] + " incident"+(byward[id]==1 ? "":"s"))
+				css += '.hexmap .hextile.'+id+' { background-color: '+colour+'; } .hexmap .hextile.'+id+'::before, .hexmap .hextile.'+id+'::after { border-color: '+colour+'; }';
+			}
 			S('#customstylesheet').html(css);
 		}
-		update();
 	});
 
 	</script>
 </head>
 <body>
 
-    <h1>BestChoice</h1>
-    <p style="text-align:center;">Increase your chances of securing a home by applying in a clever place.</p>
-    <label for="size">How many rooms?</label>
-    <select id="size">
-        <option id="one">1 bed</option>
-        <option id="two">2 bed</option>
-        <option id="three">3 bed</option>
-    </select>
+    <h1>Fire Incidents</h1>
+    <p style="text-align:center;">Fire incidents (April - September 2015) in the Leeds City Region, by ward. Get the <a href="http://leedsdatamill.org/dataset/incident-reporting-for-the-leeds-region/resource/fa7674ce-1cec-4650-9ceb-9b3afe43f742">data from the LeedsDataMill</a>.</p>
+    <label for="size">Incident type</label>
+    <select id="category"></select>
 
 	<div class="mapholder">
 		<ol class="hexmap">
-			<li class="E05001413 ARDSLEY_AND_ROBIN_HOOD r-1 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Ardsley &amp; Robin Hood">Ardsley &amp; Robin Hood</span><span class="n"></span></div></div></li>
-			<li class="E05001435 MORLEY_NORTH r-2 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Morley North">Morley North</span><span class="n"></span></div></div></li>
-			<li class="E05001436 MORLEY_SOUTH r-2 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Morley South">Morley South</span><span class="n"></span></div></div></li>
-			<li class="E05001433 MIDDLETON_PARK r-2 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Middleton Park">Middleton Park</span><span class="n"></span></div></div></li>
-			<li class="E05001439 ROTHWELL r-2 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Rothwell">Rothwell</span><span class="n"></span></div></div></li>
-			<li class="E05001423 GARFORTH_AND_SWILLINGTON r-2 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Garforth &amp; Swillington">Garforth &amp; Swillington</span><span class="n"></span></div></div></li>
-			<li class="E05001422 FARNLEY_AND_WORTLEY r-3 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Farnley &amp; Wortley">Farnley &amp; Wortley</span><span class="n"></span></div></div></li>
-			<li class="E05001415 BEESTON_AND_HOLBECK r-3 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Beeston &amp; Holbeck">Beeston &amp; Holbeck</span><span class="n"></span></div></div></li>
-			<li class="E05001420 CITY_AND_HUNSLET r-3 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="City &amp; Hunslet">City &amp; Hunslet</span><span class="n"></span></div></div></li>
-			<li class="E05001417 BURMANTOFTS_AND_RICHMOND_HILL r-3 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Burmantofts &amp; Richmond Hill">Burmantofts &amp; Richmond Hill</span><span class="n"></span></div></div></li>
-			<li class="E05001441 TEMPLE_NEWSAM r-3 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Temple Newsam">Temple Newsam</span><span class="n"></span></div></div></li>
-			<li class="E05001431 KIPPAX_AND_METHLEY r-3 c-7"><div class="hex"><div class="hexcontent"><span class="name" title="Kippax &amp; Methley">Kippax &amp; Methley</span><span class="n"></span></div></div></li>
-			<li class="E05001416 BRAMLEY_AND_STANNINGLEY r-4 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Bramley &amp; Stanningley">Bramley &amp; Stanningley</span><span class="n"></span></div></div></li>
-			<li class="E05001414 ARMLEY r-4 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Armley">Armley</span><span class="n"></span></div></div></li>
-			<li class="E05001429 HYDE_PARK_AND_WOODHOUSE r-4 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Hyde Park &amp; Woodhouse">Hyde Park &amp; Woodhouse</span><span class="n"></span></div></div></li>
-			<li class="E05001424 GIPTON_AND_HAREHILLS r-4 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Gipton &amp; Harehills">Gipton & Harehills</span><span class="n"></span></div></div></li>
-			<li class="E05001430 KILLINGBECK_AND_SEACROFT r-4 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Killingbeck &amp; Seacroft">Killingbeck &amp; Seacroft</span><span class="n"></span></div></div></li>
-			<li class="E05001438 PUDSEY r-5 c-1"><div class="hex"><div class="hexcontent"><span class="name" title="Pudsey">Pudsey</span><span class="n"></span></div></div></li>
-			<li class="E05001418 CALVERLEY_AND_FARSLEY r-5 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Calverley &amp; Farsley">Calverley &amp; Farsley</span><span class="n"></span></div></div></li>
-			<li class="E05001432 KIRKSTALL r-5 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Kirkstall">Kirkstall</span><span class="n"></span></div></div></li>
-			<li class="E05001427 HEADINGLEY r-5 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Headingley">Headingley</span><span class="n"></span></div></div></li>
-			<li class="E05001419 CHAPEL_ALLERTON r-5 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Chapel Allerton">Chapel Allerton</span><span class="n"></span></div></div></li>
-			<li class="E05001440 ROUNDHAY r-5 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Roundhay">Roundhay</span><span class="n"></span></div></div></li>
-			<li class="E05001421 CROSS_GATES_AND_WHINMOOR r-5 c-7"><div class="hex"><div class="hexcontent"><span class="name" title="Cross Gates &amp; Whinmoor">Cross Gates &amp; Whinmoor</span><span class="n"></span></div></div></li>
-			<li class="E05001425 GUISELEY_AND_RAWDON r-6 c-2"><div class="hex"><div class="hexcontent"><span class="name" title="Guiseley &amp; Rawdon">Guiseley &amp; Rawdon</span><span class="n"></span></div></div></li>
-			<li class="E05001428 HORSFORTH r-6 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Horsforth">Horsforth</span><span class="n"></span></div></div></li>
-			<li class="E05001442 WEETWOOD r-6 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Weetwood">Weetwood</span><span class="n"></span></div></div></li>
-			<li class="E05001434 MOORTOWN r-6 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Moortown">Moortown</span><span class="n"></span></div></div></li>
-			<li class="E05001426 HAREWOOD r-6 c-6"><div class="hex"><div class="hexcontent"><span class="name" title="Harewood">Harewood</span><span class="n"></span></div></div></li>
-			<li class="E05001443 WETHERBY r-6 c-7"><div class="hex"><div class="hexcontent"><span class="name" title="Wetherby">Wetherby</span><span class="n"></span></div></div></li>
-			<li class="E05001437 OTLEY_AND_YEADON r-7 c-3"><div class="hex"><div class="hexcontent"><span class="name" title="Otley &amp; Yeadon">Otley &amp; Yeadon</span><span class="n"></span></div></div></li>
-			<li class="E05001411 ADEL_AND_WHARFEDALE r-7 c-4"><div class="hex"><div class="hexcontent"><span class="name" title="Adel &amp; Wharfedale">Adel &amp; Wharfedale</span><span class="n"></span></div></div></li>
-			<li class="E05001412 ALWOODLEY r-7 c-5"><div class="hex"><div class="hexcontent"><span class="name" title="Alwoodley">Alwoodley</span><span class="n"></span></div></div></li>
-			<li class="LEEDS r-1 c-1"><div class="hex"><div class="hexcontent"><span class="name" title="Leeds">Leeds</span><span class="n"></span></div></div></li>
+			<li class="E05001413 ARDSLEY_AND_ROBIN_HOOD r-1 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Ardsley and Robin Hood">Ardsley and Robin Hood</span><span class="n"></span></div></div></li>
+			<li class="E05001435 MORLEY_NORTH r-2 c-2 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Morley North">Morley North</span><span class="n"></span></div></div></li>
+			<li class="E05001436 MORLEY_SOUTH r-2 c-3 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Morley South">Morley South</span><span class="n"></span></div></div></li>
+			<li class="E05001433 MIDDLETON_PARK r-2 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Middleton Park">Middleton Park</span><span class="n"></span></div></div></li>
+			<li class="E05001439 ROTHWELL r-2 c-5 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Rothwell">Rothwell</span><span class="n"></span></div></div></li>
+			<li class="E05001423 GARFORTH_AND_SWILLINGTON r-2 c-6 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Garforth and Swillington">Garforth and Swillington</span><span class="n"></span></div></div></li>
+			<li class="E05001422 FARNLEY_AND_WORTLEY r-3 c-2 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Farnley and Wortley">Farnley and Wortley</span><span class="n"></span></div></div></li>
+			<li class="E05001415 BEESTON_AND_HOLBECK r-3 c-3 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Beeston and Holbeck">Beeston and Holbeck</span><span class="n"></span></div></div></li>
+			<li class="E05001420 CITY_AND_HUNSLET r-3 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="City and Hunslet">City and Hunslet</span><span class="n"></span></div></div></li>
+			<li class="E05001417 BURMANTOFTS_AND_RICHMOND_HILL r-3 c-5 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Burmantofts and Richmond Hill">Burmantofts and Richmond Hill</span><span class="n"></span></div></div></li>
+			<li class="E05001441 TEMPLE_NEWSAM r-3 c-6 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Temple Newsam">Temple Newsam</span><span class="n"></span></div></div></li>
+			<li class="E05001431 KIPPAX_AND_METHLEY r-3 c-7 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Kippax and Methley">Kippax and Methley</span><span class="n"></span></div></div></li>
+			<li class="E05001416 BRAMLEY_AND_STANNINGLEY r-4 c-2 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Bramley and Stanningley">Bramley and Stanningley</span><span class="n"></span></div></div></li>
+			<li class="E05001414 ARMLEY r-4 c-3 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Armley">Armley</span><span class="n"></span></div></div></li>
+			<li class="E05001429 HYDE_PARK_AND_WOODHOUSE r-4 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Hyde Park and Woodhouse">Hyde Park and Woodhouse</span><span class="n"></span></div></div></li>
+			<li class="E05001424 GIPTON_AND_HAREHILLS r-4 c-5 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Gipton and Harehills">Gipton and Harehills</span><span class="n"></span></div></div></li>
+			<li class="E05001430 KILLINGBECK_AND_SEACROFT r-4 c-6 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Killingbeck and Seacroft">Killingbeck and Seacroft</span><span class="n"></span></div></div></li>
+			<li class="E05001438 PUDSEY r-5 c-1 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Pudsey">Pudsey</span><span class="n"></span></div></div></li>
+			<li class="E05001418 CALVERLEY_AND_FARSLEY r-5 c-2 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Calverley and Farsley">Calverley and Farsley</span><span class="n"></span></div></div></li>
+			<li class="E05001432 KIRKSTALL r-5 c-3 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Kirkstall">Kirkstall</span><span class="n"></span></div></div></li>
+			<li class="E05001427 HEADINGLEY r-5 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Headingley">Headingley</span><span class="n"></span></div></div></li>
+			<li class="E05001419 CHAPEL_ALLERTON r-5 c-5 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Chapel Allerton">Chapel Allerton</span><span class="n"></span></div></div></li>
+			<li class="E05001440 ROUNDHAY r-5 c-6 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Roundhay">Roundhay</span><span class="n"></span></div></div></li>
+			<li class="E05001421 CROSS_GATES_AND_WHINMOOR r-5 c-7 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Cross Gates and Whinmoor">Cross Gates and Whinmoor</span><span class="n"></span></div></div></li>
+			<li class="E05001425 GUISELEY_AND_RAWDON r-6 c-2 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Guiseley and Rawdon">Guiseley and Rawdon</span><span class="n"></span></div></div></li>
+			<li class="E05001428 HORSFORTH r-6 c-3 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Horsforth">Horsforth</span><span class="n"></span></div></div></li>
+			<li class="E05001442 WEETWOOD r-6 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Weetwood">Weetwood</span><span class="n"></span></div></div></li>
+			<li class="E05001434 MOORTOWN r-6 c-5 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Moortown">Moortown</span><span class="n"></span></div></div></li>
+			<li class="E05001426 HAREWOOD r-6 c-6 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Harewood">Harewood</span><span class="n"></span></div></div></li>
+			<li class="E05001443 WETHERBY r-6 c-7 hextile"><div class="hex hexright"><div class="hexcontent"><span class="name" title="Wetherby">Wetherby</span><span class="n"></span></div></div></li>
+			<li class="E05001437 OTLEY_AND_YEADON r-7 c-3 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Otley and Yeadon">Otley and Yeadon</span><span class="n"></span></div></div></li>
+			<li class="E05001411 ADEL_AND_WHARFEDALE r-7 c-4 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Adel and Wharfedale">Adel and Wharfedale</span><span class="n"></span></div></div></li>
+			<li class="E05001412 ALWOODLEY r-7 c-5 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Alwoodley">Alwoodley</span><span class="n"></span></div></div></li>
+			<li class="LEEDS r-1 c-1 hextile"><div class="hex"><div class="hexcontent"><span class="name" title="Leeds">Leeds</span><span class="n"></span></div></div></li>
 		</ol>
 	</div>
-	<p>A hexagon-based version of <a href="http://thomasforth.github.io/leedssimplifiedwardmap/">Thomas Forth's Leeds map</a></p>
 </body>
 </html>

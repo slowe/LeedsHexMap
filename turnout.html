@@ -1,0 +1,340 @@
+<html>
+<head>
+	<title>Local election results | Leeds ward map</title>
+	<style>
+	html { height: 100%; }
+	body { font-family: sans-serif; margin: 0px; padding: 0px; background-color: white; text-align: center; height: 100%; width: 100%; justify-content: center; }
+	h1 { display: block; margin-bottom: 0px; margin-top: 0.5em; }
+	.mapholder {
+		background: #f9f9f9;
+		padding: 1em;
+		margin-top: 1em;
+	}
+	.hexmap {
+		list-style: none;
+		margin: 0px;
+		padding: 0px;
+		border-color: red;
+		font-size: 2em;
+	}
+	.hexmap .hextile {
+		margin-top: 0em;
+		margin-left: 0.7em;
+		margin-right: 0.7em;
+		margin-bottom: 0em;
+		width: 1.4em;
+		background-color: #efefef;
+		position: absolute;
+		float: left;
+		line-height: 2.2em;
+		height: 2.4em;
+		text-align: center;
+		font-family: monospace, sans-serif;
+		opacity: 1;
+		transition: all 1s linear;
+		box-sizing: border-box;
+	}
+	.hexmap .hextile:before {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-left: 0px;
+		border-right: 0.7em solid #efefef;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		right: 1.4em;
+	}
+	.hexmap .hextile:after {
+		content: "";
+		width: 0; 
+		position: absolute;
+		left: 1.4em;
+		border-color: transparent;
+		border-right: 0px;
+		border-left: 0.7em solid #efefef;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		top:0em;
+		z-index: 1;
+	}
+	.hexmap a.hex { color: inherit; text-decoration: none; }
+	.hexmap .hextile,
+	.hexmap .hextile:before,
+	.hexmap .hextile:after {
+		transition: all 0.5s linear;
+	}
+	.hexmap .hextile > .hex {
+		overflow: hidden;
+		line-height: 1em;
+		margin: 0.2em 0.1em;
+		width: 1.2em;
+		height: 2em;
+		text-align: center;
+		box-sizing: border-box;
+		position: absolute;
+		left: 0px;
+	}
+	.hexmap .hextile:hover > .hex, .hexmap .hextile.hover > .hex, .hexmap .hextile > .hex:focus {
+		overflow: visible;
+		display: inline-block;
+		white-space: nowrap;
+		background: black;
+		width: auto;
+		margin: 0px;
+		padding: 0.2em 0.1em;
+		padding-right: 0.5em;
+		z-index: 100;
+		line-height: 2em;
+		height: 2.4em;
+		color: white;
+	}
+
+	.hexmap .hextile:hover > .hex:before, .hexmap .hextile.hover > .hex:before, .hexmap .hextile .hex:focus:before {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-left: 0px;
+		border-right: 0.7em solid black;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		left: -0.7em;
+		top:0px;
+	}
+	.hexmap .hextile .hex .hexcontent {
+		text-align: center;
+	}
+	.hexmap .hextile:hover .hex .hexcontent, .hexmap .hextile.hover .hex .hexcontent, .hexmap .hextile .hex:focus .hexcontent {
+		line-height: 1em;
+		text-align: left;
+	}
+	.hexmap .hex .n {
+		display: block;
+		font-size: 0.7em;
+	}
+	.hexmap .hex .name {
+		font-size: 0.4em;
+		text-align: left;
+		white-space: nowrap;
+	}
+	.hexmap .hextile:hover .hex .name, .hexmap .hextile.hover .hex .name, .hexmap .hextile .hex:focus .name {
+		text-align: left;
+	}
+	/* Deal with right-aligned hex content */
+	.hexmap .hextile:hover > .hex.hexright, .hexmap .hextile.hover > .hex.hexright, .hexmap .hextile > .hex.hexright:focus {
+		position: absolute;
+		left: auto;
+		right: 0px;
+	}
+	.hexmap .hextile:hover > .hex.hexright:before, .hexmap .hextile.hover > .hex.hexright:before, .hexmap .hextile > .hex.hexright:focus:before {
+		border: 0px;
+	}
+	.hexmap .hextile:hover > .hex.hexright:after, .hexmap .hextile.hover > .hex.hexright:after, .hexmap .hextile > .hex.hexright:focus:after {
+		content: " ";
+		width: 0; height: 0;
+		border-color: inherit;
+		border-right: 0px;
+		border-left: 0.7em solid black;
+		border-top: 1.2em solid transparent!important;
+		border-bottom: 1.2em solid transparent!important;
+		position: absolute;
+		right: -0.692em;
+		top:0px;
+	}
+	.hexmap .hextile:hover > .hex.hexright, .hexmap .hextile.hover > .hex.hexright, .hexmap .hextile > .hex.hexright:focus {
+		padding: 0.2em 0.1em;
+		padding-left: 0.5em;
+	}
+
+	ul.key {
+		list-style: none;
+	}
+	ul.key li {
+		display: inline-block;
+		width: auto;
+		position: relative;
+		padding: 0.2em;
+		margin-right: 0.2em;
+	}
+	.hexmap {
+		position: relative;
+		height: 18.75em;
+		width: 16.25em;
+		margin: auto;
+	}
+	li { position: absolute; }
+	.r-1 { bottom: 0em; }
+	.r-2 { bottom: 2.5em; }
+	.r-3 { bottom: 5em; }
+	.r-4 { bottom: 7.5em; }
+	.r-5 { bottom: 10em; }
+	.r-6 { bottom: 12.5em; }
+	.r-7 { bottom: 15em; }
+	.r-8 { bottom: 17.5em; }
+	.r-9 { bottom: 20em; }
+	.r-10 { bottom: 22.5em; }
+	.r-11 { bottom: 25em; }
+	.r-12 { bottom: 27.5em; }
+	.r-13 { bottom: 30em; }
+	.c-1 { left: 0em; }
+	.c-2 { left: 2.25em; margin-bottom: 1.25em!important; }
+	.c-3 { left: 4.5em; }
+	.c-4 { left: 6.75em; margin-bottom: 1.25em!important; }
+	.c-5 { left: 9em; }
+	.c-6 { left: 11.25em; margin-bottom: 1.25em!important; }
+	.c-7 { left: 13.5em; }
+	.c-8 { left: 15.75em; margin-bottom: 1.25em!important; }
+
+	p {
+		max-width: 800px;
+		text-align: left;
+		margin: 1em auto;
+	}
+	code {
+		color: #02a24b;
+	}
+	select {
+		font-size: 1em;
+	}
+	</style>
+	<script>
+	// StuQuery - a minimal script to provide jQuery-like functionality
+	var eventcache={};function S(g){function a(n,m){var j=false;if(m[0]=="."){m=m.substr(1);for(var l=0;l<n.classList.length;l++){if(n.classList[l]==m){return true}}}else{if(m[0]=="#"){if(n.id==m.substr(1)){return true}}else{if(n.tagName==m.toUpperCase()){return true}}}return false}function c(p,o){var n=-1;var l=new Array();if(o.indexOf(":eq")>0){var j=o.replace(/(.*)\:eq\(([0-9]+)\)/,"$1 $2").split(" ");o=j[0];n=parseInt(j[1])}if(o[0]=="."){els=p.getElementsByClassName(o.substr(1))}else{if(o[0]=="#"){els=p.getElementById(o.substr(1))}else{els=p.getElementsByTagName(o)}}if(!els){els=[]}if(els.nodeName&&els.nodeName=="SELECT"){l.push(els)}else{if(typeof els.length!=="number"){els=[els]}for(k=0;k<els.length;k++){l.push(els[k])}if(n>=0&&l.length>0){if(n<l.length){l=[l[n]]}else{l=[]}}}return l}function d(p){if(typeof p==="string"){var e,p,q,o,m,l,n;e=p.split(" ");for(o=0;o<e.length;o++){if(o==0){p=c(document,e[o])}else{q=new Array();for(m=0;m<p.length;m++){q=q.concat(c(p[m],e[o]))}p=q.splice(0)}}}this.e=[];if(!p){return this}if(typeof p.length!=="number"){p=[p]}this.e=p;return this}d.prototype.ready=function(e){/in/.test(document.readyState)?setTimeout("S(document).ready("+e+")",9):e()};d.prototype.html=function(j){if(typeof j==="number"){j=""+j}if(typeof j!=="string"&&this.e.length==1){return this.e[0].innerHTML}if(typeof j==="string"){for(var e=0;e<this.e.length;e++){this.e[e].innerHTML=j}}return this};d.prototype.append=function(j){if(!j&&this.e.length==1){return this.e[0].innerHTML}if(j){for(var e=0;e<this.e.length;e++){this.e[e].innerHTML+=j}}return this};function h(e,l){if(e&&e.length>0){for(var j=0;j<e.length;j++){if(e[j].node==l){return{success:true,match:j}}}}return{success:false}}function f(n,l,j,i,m){if(!eventcache[l]){eventcache[l]=new Array()}eventcache[l].push({node:n,fn:j,fn2:i,data:m})}function b(j){if(eventcache[j.type]){var i=h(eventcache[j.type],j.currentTarget);if(i.success){if(i.match.data){j.data=eventcache[j.type][i.match].data}return{fn:eventcache[j.type][i.match].fn,data:j}}}return function(){return{fn:""}}}d.prototype.off=function(l){if(typeof Element.prototype.removeEventListener!=="function"){Element.prototype.removeEventListener=function(r,o){if(!oListeners.hasOwnProperty(r)){return}var n=oListeners[r];for(var i=-1,m=0;m<n.aEls.length;m++){if(n.aEls[m]===this){i=m;break}}if(i===-1){return}for(var q=0,p=n.aEvts[i];q<p.length;q++){if(p[q]===o){p.splice(q,1)}}}}for(var j=0;j<this.e.length;j++){var e=h(eventcache[l],this.e[j]);if(e.success){this.e[j].removeEventListener(l,eventcache[l][e.match].fn2,false);eventcache[l].splice(e.match,1)}}return this};d.prototype.on=function(m,n,l){m=m||window.event;this.cache=[4,5,6];if(typeof n==="function"&&!l){l=n;n=""}if(typeof l!=="function"){return this}if(this.e.length>0){var o=this;var e=function(i){var p=b({currentTarget:this,type:m,data:n,originalEvent:i});if(typeof p.fn==="function"){return p.fn.call(o,p.data)}};for(var j=0;j<this.e.length;j++){f(this.e[j],m,l,e,n);if(this.e[j].addEventListener){this.e[j].addEventListener(m,e,false)}else{if(this.e[j].attachEvent){this.e[j].attachEvent(m,e)}}}}return this};d.prototype.trigger=function(m){var l;if(document.createEvent){l=document.createEvent("HTMLEvents");l.initEvent(m,true,true)}else{l=document.createEventObject();l.eventType=m}l.eventName=m;for(var j=0;j<this.e.length;j++){if(document.createEvent){this.e[j].dispatchEvent(l)}else{this.e[j].fireEvent("on"+l.eventType,l)}}return this};d.prototype.focus=function(){if(this.e.length==1){this.e[0].focus()}return this};d.prototype.blur=function(){if(this.e.length==1){this.e[0].blur()}return this};d.prototype.remove=function(){if(!this.e){return this}for(var e=this.e.length-1;e>=0;e--){if(!this.e[e]){return}if(typeof this.e[e].remove==="function"){this.e[e].remove()}else{if(typeof this.e[e].parentElement.removeChild==="function"){this.e[e].parentElement.removeChild(this.e[e])}}}return S(this.e)};d.prototype.hasClass=function(j){var e=true;for(var l=0;l<this.e.length;l++){if(!this.e[l].className.match(new RegExp("(\\s|^)"+j+"(\\s|$)"))){e=false}}return e};d.prototype.toggleClass=function(e){for(var j=0;j<this.e.length;j++){if(this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=this.e[j].className.replace(new RegExp("(\\s|^)"+e+"(\\s|$)","g")," ").replace(/ $/,"")}else{this.e[j].className=(this.e[j].className+" "+e).replace(/^ /,"")}}return S(this.e)};d.prototype.addClass=function(e){for(var j=0;j<this.e.length;j++){if(!this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=(this.e[j].className+" "+e).replace(/^ /,"")}}return S(this.e)};d.prototype.removeClass=function(e){for(var j=0;j<this.e.length;j++){while(this.e[j].className.match(new RegExp("(\\s|^)"+e+"(\\s|$)"))){this.e[j].className=this.e[j].className.replace(new RegExp("(\\s|^)"+e+"(\\s|$)","g")," ").replace(/ $/,"").replace(/^ /,"")}}return S(this.e)};d.prototype.css=function(m){var o;for(var l=0;l<this.e.length;l++){o={};var n=this.e[l].getAttribute("style");if(n){var q=this.e[l].getAttribute("style").split(";");for(var j=0;j<q.length;j++){var p=q[j].split(":");if(p.length==2){o[p[0]]=p[1]}}}if(typeof m==="object"){for(key in m){o[key]=m[key]}var e="";for(key in o){if(e){e+=";"}if(o[key]){e+=key+":"+o[key]}}this.e[l].setAttribute("style",e)}}if(this.e.length==1&&typeof m==="string"){return o[m]}return S(this.e)};d.prototype.parent=function(){var j=[];for(var e=0;e<this.e.length;e++){j.push(this.e[e].parentElement)}return S(j)};d.prototype.children=function(m){if(typeof m==="string"){var e=[];for(var j=0;j<this.e.length;j++){for(var l=0;l<this.e[j].children.length;l++){if(a(this.e[j].children[l],m)){e.push(this.e[j].children[l])}}}return S(e)}else{for(var j=0;j<this.e.length;j++){this.e[j]=(this.e[j].children.length>m?this.e[j].children[m]:this.e[j])}return S(this.e)}};d.prototype.find=function(j){var m=[];var e=[];for(var l=0;l<this.e.length;l++){m=c(this.e[l],j);for(k=0;k<m.length;k++){e.push(m[k])}}return S(e)};d.prototype.attr=function(e,m){var l=[];for(var j=0;j<this.e.length;j++){l.push(this.e[j].getAttribute(e));if(typeof m==="string"||typeof m==="number"){this.e[j].setAttribute(e,m)}}if(l.length==1){l=l[0]}if(typeof m==="undefined"){return l}else{return S(this.e)}};d.prototype.prop=function(e,m){var l=[];for(var j=0;j<this.e.length;j++){l.push(this.e[j].getAttribute(e));if(typeof m==="boolean"){if(m){this.e[j].setAttribute(e,e)}else{this.e[j].removeAttribute(e)}}}if(l.length==1){l=l[0]}return l};d.prototype.clone=function(){var e=document.createElement("div");e.appendChild(this.e[0].cloneNode(true));return e.innerHTML};d.prototype.replaceWith=function(j){var l=document.createElement("span");l.innerHTML=j;var m=S(this.e);for(var e=0;e<this.e.length;e++){m.e[0].parentNode.replaceChild(l,m.e[0])}return m};d.prototype.ajax=function(l,j){if(typeof l!=="string"){return false}if(!j){j={}}j.url=l;var n=(window.XMLHttpRequest)?new XMLHttpRequest():new ActiveXObject("Microsoft.XMLHTTP");n.addEventListener("load",e);n.addEventListener("error",i);function e(o){if(n.status===200){if(typeof j.complete==="function"){j.complete.call((j["this"]?j["this"]:this),(j.dataType=="json")?JSON.parse(n.responseText):n.responseText,j)}}else{i(o)}}function i(o){if(typeof j.error==="function"){j.error.call((j["this"]?j["this"]:this),o,j)}}try{n.open("GET",l)}catch(m){i(m)}try{n.send()}catch(m){i(m)}return this};d.prototype.loadJSON=function(i,j,e){if(!e){e={}}e.dataType="json";e.complete=j;this.ajax(i,e);return this};return new d(g)};
+
+	
+	S(document).ready(function(){
+	
+		var wards = {"Adel and Wharfedale": "E05001411","Alwoodley": "E05001412","Ardsley and Robin Hood": "E05001413","Armley": "E05001414","Beeston and Holbeck": "E05001415","Bramley and Stanningley": "E05001416","Burmantofts and Richmond Hill": "E05001417","Calverley and Farsley": "E05001418","Chapel Allerton": "E05001419","City and Hunslet": "E05001420","Cross Gates and Whinmoor": "E05001421","Farnley and Wortley": "E05001422","Garforth and Swillington": "E05001423","Gipton and Harehills": "E05001424","Guiseley and Rawdon": "E05001425","Harewood": "E05001426","Headingley": "E05001427","Horsforth": "E05001428","Hyde Park and Woodhouse": "E05001429","Killingbeck and Seacroft": "E05001430","Kippax and Methley": "E05001431","Kirkstall": "E05001432","Middleton Park": "E05001433","Moortown": "E05001434","Morley North": "E05001435","Morley South": "E05001436","Otley and Yeadon": "E05001437","Pudsey": "E05001438","Rothwell": "E05001439","Roundhay": "E05001440","Temple Newsam": "E05001441","Weetwood": "E05001442","Wetherby": "E05001443" }
+		var years = {'2011':{},'2016':{}};
+		for(y in years){
+			S(document).ajax("data/election"+y+".csv",{
+				'complete': function(data,attr){
+					years[attr.year].data = data;
+					if(typeof data==="string") data = data.replace(/\r/g,'').split(/[\n]/);
+					var db = new Array();
+					for(var i = 1; i < data.length; i++){
+						line = data[i].split(",");
+						var wd = "";
+						for(var w in wards){
+							if(w.toUpperCase() == line[2]) wd = w;
+						}
+						//year,type,area,surname,forename,partyname,votes,SpoiltPapers,elected,electorate
+						//2011,LOCAL,ADEL AND WHARFEDALE,CARTER,Les,Conservative Party [The],4144,,ELECTED,15862
+						if(line[0]) db.push({'year':line[0],'itype':line[1],'ward':line[2],'w':wd,'surname':line[3],'forename':line[4],'party':line[5],'votes':line[6],'spoilt':line[7],'elected':line[8],'electorate':line[9]});
+					}
+					years[attr.year].db = db;
+					loaded();
+				},
+				'error': function(e){ console.log(e); },
+				'year': y
+			})
+		}
+		function loaded(){
+			var got = 0;
+			var n = 0;
+			for(var y in years){
+				if(years[y]) got++;
+				n++;
+			}
+			if(got != n) return;
+			html = "";
+			for(var y in years) html += '<option value="'+y+'">'+y+'</option>'
+			S('#years').html(html);
+			update();
+		}
+
+		// Create ourselves an empty stylesheet that we can update later
+		S('body').append('<style id="customstylesheet"></style>');
+
+		// Listen for changes to the dropdown select box
+		S('#category').on('change',function(){ update(); });
+		// Listen for changes to the dropdown select box
+		S('#years').on('change',function(){ update(); });
+
+		function update() {
+
+			var y = S('#years').e[0].value;
+			var typ = "turnout";//S('#category').e[0].value;
+
+			var byward = { 'Leeds': 0 };
+			var electorate = { 'Leeds': 0 };
+			for(i = 0; i < years[y].db.length; i++){
+				w = years[y].db[i].w;
+				w = (wards[w]) ? wards[w] : "";
+				if(w && !byward[w]) byward[w] = 0;
+				if(typ == "turnout" && years[y].db[i].votes){
+					if(w) byward[w] += parseInt(years[y].db[i].votes);
+					byward['Leeds'] += parseInt(years[y].db[i].votes);
+					if(w) electorate[w] = parseInt(years[y].db[i].electorate);
+				}
+			}
+			for(id in electorate){
+				if(id != "Leeds") electorate['Leeds'] += electorate[id];
+			}
+			var max = 0;
+			for(id in byward){
+				byward[id] = Math.round(100*byward[id]/electorate[id]);
+				if(byward[id] > max && id != "Leeds") max = byward[id];
+			}
+			var css = "";
+			for(id in byward){
+				if(byward[id]){
+					var colour = "rgba(246, 136, 31, " + byward[id] / max + ")";
+					S('.'+id).find('.n').html(byward[id] + "%")
+					css += '.hexmap .hextile.'+id+' { background-color: '+colour+'; } .hexmap .hextile.'+id+':before, .hexmap .hextile.'+id+':after { border-color: '+colour+'; }';
+				}
+			}
+			S('#customstylesheet').html(css);
+		}
+	});
+
+	</script>
+</head>
+<body>
+
+    <h1>Local election turnout</h1>
+    <p style="text-align:center;">Local election turnout in Leeds, by ward. Get the <a href="http://leedsdatamill.org/dataset/election-results-local">data from the LeedsDataMill</a>.</p>
+    <label for="size">Year</label>
+    <select id="years"></select><!--<select id="category"><option value="turnout">Turnout</option></select>-->
+
+	<div class="mapholder">
+		<ol class="hexmap">
+			<li class="E05001437 OTLEY_AND_YEADON r-7 c-3 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Otley and Yeadon">Otley and Yeadon</span><span class="n"></span></div></a></li>
+			<li class="E05001411 ADEL_AND_WHARFEDALE r-7 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Adel and Wharfedale">Adel and Wharfedale</span><span class="n"></span></div></a></li>
+			<li class="E05001412 ALWOODLEY r-7 c-5 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Alwoodley">Alwoodley</span><span class="n"></span></div></a></li>
+			<li class="E05001425 GUISELEY_AND_RAWDON r-6 c-2 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Guiseley and Rawdon">Guiseley and Rawdon</span><span class="n"></span></div></a></li>
+			<li class="E05001428 HORSFORTH r-6 c-3 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Horsforth">Horsforth</span><span class="n"></span></div></a></li>
+			<li class="E05001442 WEETWOOD r-6 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Weetwood">Weetwood</span><span class="n"></span></div></a></li>
+			<li class="E05001434 MOORTOWN r-6 c-5 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Moortown">Moortown</span><span class="n"></span></div></a></li>
+			<li class="E05001426 HAREWOOD r-6 c-6 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Harewood">Harewood</span><span class="n"></span></div></a></li>
+			<li class="E05001443 WETHERBY r-6 c-7 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Wetherby">Wetherby</span><span class="n"></span></div></a></li>
+			<li class="E05001438 PUDSEY r-5 c-1 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Pudsey">Pudsey</span><span class="n"></span></div></a></li>
+			<li class="E05001418 CALVERLEY_AND_FARSLEY r-5 c-2 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Calverley and Farsley">Calverley and Farsley</span><span class="n"></span></div></a></li>
+			<li class="E05001432 KIRKSTALL r-5 c-3 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Kirkstall">Kirkstall</span><span class="n"></span></div></a></li>
+			<li class="E05001427 HEADINGLEY r-5 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Headingley">Headingley</span><span class="n"></span></div></a></li>
+			<li class="E05001419 CHAPEL_ALLERTON r-5 c-5 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Chapel Allerton">Chapel Allerton</span><span class="n"></span></div></a></li>
+			<li class="E05001440 ROUNDHAY r-5 c-6 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Roundhay">Roundhay</span><span class="n"></span></div></a></li>
+			<li class="E05001421 CROSS_GATES_AND_WHINMOOR r-5 c-7 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Cross Gates and Whinmoor">Cross Gates and Whinmoor</span><span class="n"></span></div></a></li>
+			<li class="E05001416 BRAMLEY_AND_STANNINGLEY r-4 c-2 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Bramley and Stanningley">Bramley and Stanningley</span><span class="n"></span></div></a></li>
+			<li class="E05001414 ARMLEY r-4 c-3 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Armley">Armley</span><span class="n"></span></div></a></li>
+			<li class="E05001429 HYDE_PARK_AND_WOODHOUSE r-4 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Hyde Park and Woodhouse">Hyde Park and Woodhouse</span><span class="n"></span></div></a></li>
+			<li class="E05001424 GIPTON_AND_HAREHILLS r-4 c-5 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Gipton and Harehills">Gipton and Harehills</span><span class="n"></span></div></a></li>
+			<li class="E05001430 KILLINGBECK_AND_SEACROFT r-4 c-6 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Killingbeck and Seacroft">Killingbeck and Seacroft</span><span class="n"></span></div></a></li>
+			<li class="E05001422 FARNLEY_AND_WORTLEY r-3 c-2 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Farnley and Wortley">Farnley and Wortley</span><span class="n"></span></div></a></li>
+			<li class="E05001415 BEESTON_AND_HOLBECK r-3 c-3 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Beeston and Holbeck">Beeston and Holbeck</span><span class="n"></span></div></a></li>
+			<li class="E05001420 CITY_AND_HUNSLET r-3 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="City and Hunslet">City and Hunslet</span><span class="n"></span></div></a></li>
+			<li class="E05001417 BURMANTOFTS_AND_RICHMOND_HILL r-3 c-5 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Burmantofts and Richmond Hill">Burmantofts and Richmond Hill</span><span class="n"></span></div></a></li>
+			<li class="E05001441 TEMPLE_NEWSAM r-3 c-6 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Temple Newsam">Temple Newsam</span><span class="n"></span></div></a></li>
+			<li class="E05001431 KIPPAX_AND_METHLEY r-3 c-7 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Kippax and Methley">Kippax and Methley</span><span class="n"></span></div></a></li>
+			<li class="E05001435 MORLEY_NORTH r-2 c-2 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Morley North">Morley North</span><span class="n"></span></div></a></li>
+			<li class="E05001436 MORLEY_SOUTH r-2 c-3 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Morley South">Morley South</span><span class="n"></span></div></a></li>
+			<li class="E05001433 MIDDLETON_PARK r-2 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Middleton Park">Middleton Park</span><span class="n"></span></div></a></li>
+			<li class="E05001439 ROTHWELL r-2 c-5 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Rothwell">Rothwell</span><span class="n"></span></div></a></li>
+			<li class="E05001423 GARFORTH_AND_SWILLINGTON r-2 c-6 hextile"><a href="#" class="hex hexright"><div class="hexcontent"><span class="name" title="Garforth and Swillington">Garforth and Swillington</span><span class="n"></span></div></a></li>
+			<li class="E05001413 ARDSLEY_AND_ROBIN_HOOD r-1 c-4 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Ardsley and Robin Hood">Ardsley and Robin Hood</span><span class="n"></span></div></a></li>
+			<li class="LEEDS r-1 c-1 hextile"><a href="#" class="hex"><div class="hexcontent"><span class="name" title="Leeds">Leeds</span><span class="n"></span></div></a></li>
+		</ol>
+	</div>
+</body>
+</html>
